@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Survey Results</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+    }
+    header {
+      background-color: #c8102e;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #c8102e;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      color: #333;
+      margin-top: 1.5rem;
+    }
+    p {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    a {
+      color: #c8102e;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Tim Hortons Survey</h2>
+</header>
+
+<div class="container">
+  <h1>Thank you for your feedback!</h1>
+
+  <h2>Cleanliness</h2>
+  <p>Your feedback: {{ cleanliness }}</p>
+  <p>Sentiment: {{ cleanliness_label }}</p>
+
+  <h2>Time / Speed of Service</h2>
+  <p>Your feedback: {{ time }}</p>
+  <p>Sentiment: {{ time_label }}</p>
+
+  <h2>Courtesy</h2>
+  <p>Your feedback: {{ courtesy }}</p>
+  <p>Sentiment: {{ courtesy_label }}</p>
+
+  <h2>Food Quality</h2>
+  <p>Your feedback: {{ food_quality }}</p>
+  <p>Sentiment: {{ food_label }}</p>
+
+  <p><a href="{{ url_for('survey') }}">Submit another feedback</a></p>
+  <p><a href="{{ url_for('overall') }}">View Overall Sentiments</a></p>
+</div>
+
+</body>
+</html>

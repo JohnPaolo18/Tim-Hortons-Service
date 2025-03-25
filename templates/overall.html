@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Overall Sentiments</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+    }
+    header {
+      background-color: #c8102e;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #c8102e;
+      margin-bottom: 1rem;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 60%;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.8rem;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    a {
+      color: #c8102e;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Tim Hortons Survey</h2>
+</header>
+
+<div class="container">
+  <h1>Overall Sentiment Counts</h1>
+  <table>
+    <tr>
+      <th>Category</th>
+      <th>Positive Count</th>
+      <th>Negative Count</th>
+    </tr>
+    <tr>
+      <td>Cleanliness</td>
+      <td>{{ data.cleanliness.POSITIVE }}</td>
+      <td>{{ data.cleanliness.NEGATIVE }}</td>
+    </tr>
+    <tr>
+      <td>Time / Speed</td>
+      <td>{{ data.time.POSITIVE }}</td>
+      <td>{{ data.time.NEGATIVE }}</td>
+    </tr>
+    <tr>
+      <td>Courtesy</td>
+      <td>{{ data.courtesy.POSITIVE }}</td>
+      <td>{{ data.courtesy.NEGATIVE }}</td>
+    </tr>
+    <tr>
+      <td>Food Quality</td>
+      <td>{{ data.food_quality.POSITIVE }}</td>
+      <td>{{ data.food_quality.NEGATIVE }}</td>
+    </tr>
+  </table>
+
+  <p style="margin-top: 2rem;"><a href="{{ url_for('index') }}">Back to Home</a></p>
+</div>
+
+</body>
+</html>

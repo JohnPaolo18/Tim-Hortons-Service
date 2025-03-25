@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tim Hortons Service Survey</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+    }
+    header {
+      background-color: #c8102e;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #c8102e;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.1rem;
+      color: #333;
+    }
+    img {
+      margin: 1rem 0;
+      width: 200px;
+      height: 200px;
+    }
+    a {
+      color: #c8102e;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Tim Hortons Survey</h2>
+</header>
+
+<div class="container">
+  <h1>Welcome to the Tim Hortons Service Survey</h1>
+  <p>Scan this QR code to access the survey:</p>
+  {% if qr_image %}
+    <img src="{{ qr_image }}" alt="QR Code">
+  {% else %}
+    <p>QR code could not be generated at this time.</p>
+  {% endif %}
+  <p>Or click <a href="{{ survey_url }}">here</a> to take the survey.</p>
+</div>
+
+</body>
+</html>

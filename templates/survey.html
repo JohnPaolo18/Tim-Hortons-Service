@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tim Hortons Service Survey</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+    }
+    header {
+      background-color: #c8102e;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #c8102e;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+      color: #333;
+    }
+    textarea {
+      width: 100%;
+      margin: 0.5rem 0;
+      font-family: Arial, sans-serif;
+    }
+    input[type="submit"] {
+      background-color: #c8102e;
+      color: #fff;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    input[type="submit"]:hover {
+      background-color: #a00c24;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Tim Hortons Survey</h2>
+</header>
+
+<div class="container">
+  <h1>Please provide feedback on each category</h1>
+  <form method="post">
+    <label for="cleanliness">Cleanliness:</label><br>
+    <textarea id="cleanliness" name="cleanliness" rows="2" cols="50"></textarea><br><br>
+
+    <label for="time">Time / Speed of Service:</label><br>
+    <textarea id="time" name="time" rows="2" cols="50"></textarea><br><br>
+
+    <label for="courtesy">Courtesy:</label><br>
+    <textarea id="courtesy" name="courtesy" rows="2" cols="50"></textarea><br><br>
+
+    <label for="food_quality">Food Quality:</label><br>
+    <textarea id="food_quality" name="food_quality" rows="2" cols="50"></textarea><br><br>
+
+    <input type="submit" value="Submit Feedback">
+  </form>
+</div>
+
+</body>
+</html>
