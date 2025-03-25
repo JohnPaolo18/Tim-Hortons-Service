@@ -4,27 +4,19 @@ import qrcode
 from io import BytesIO
 import base64
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
 app = Flask(__name__)
-
 # ------------------------------------------
 # Hugging Face Inference API for sentiment
 # ------------------------------------------
-
-HF_TOKEN = os.getenv("HF_TOKEN")
 API_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english"
-# Replace with your actual token
-HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 def analyze_sentiment(text):
     """
     Calls Hugging Face DistilBERT model to get POSITIVE or NEGATIVE sentiment.
-    Because the model sometimes returns nested lists, we handle that carefully.
     """
     payload = {"inputs": text}
-    response = requests.post(API_URL, headers=HEADERS, json=payload)
+    response = requests.post(API_URL, json=payload)
     print("DEBUG response text:", response.text)  # For troubleshooting
     try:
         response.raise_for_status()
@@ -33,7 +25,7 @@ def analyze_sentiment(text):
 
         # Check if result is a nested list: [[{label,score}, {label,score}]]
         if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-            predictions = result[0]  # e.g. [{'label': 'NEGATIVE', 'score': 0.9997}, ...]
+            predictions = result[0] 
             best = max(predictions, key=lambda x: x["score"])
             label = best["label"]
             score = best["score"]
@@ -51,12 +43,7 @@ def analyze_sentiment(text):
         print("Error calling Hugging Face API:", e)
         return "Error analyzing sentiment"
 
-
 def get_label_only(text):
-    """
-    For counting POSITIVE/NEGATIVE tallies, we only need the label.
-    If the full result is "POSITIVE (score: 0.9998)", we'll parse out "POSITIVE".
-    """
     full_result = analyze_sentiment(text)
     if full_result.startswith("POSITIVE"):
         return "POSITIVE"
@@ -64,7 +51,6 @@ def get_label_only(text):
         return "NEGATIVE"
     else:
         return "NEGATIVE"  # default fallback if there's an error or "Unexpected"
-
 
 # ------------------------------------------
 # Local QR Code Generation
@@ -79,8 +65,6 @@ def generate_qr_code_local(text):
     img.save(buffer, format="PNG")
     base64_img = base64.b64encode(buffer.getvalue()).decode()
     return "data:image/png;base64," + base64_img
-
-
 # ------------------------------------------
 # In-memory storage for sentiment counts
 # ------------------------------------------
@@ -90,8 +74,6 @@ feedback_storage = {
     "courtesy": {"POSITIVE": 0, "NEGATIVE": 0},
     "food_quality": {"POSITIVE": 0, "NEGATIVE": 0}
 }
-
-
 # ------------------------------------------
 # Routes
 # ------------------------------------------
@@ -100,8 +82,7 @@ def index():
     """
     Home page: generates a QR code linking to /survey
     """
-    # survey_url = request.host_url + "survey"  # e.g. http://127.0.0.1:5000/survey
-    survey_url = "http://10.10.4.21:5000/survey"
+    survey_url = "http://10.10.7.40:5000/survey"
     qr_image_data = generate_qr_code_local(survey_url)
     return render_template('index.html', qr_image=qr_image_data, survey_url=survey_url)
 
@@ -169,11 +150,8 @@ def overall():
     """
     return render_template('overall.html', data=feedback_storage)
 
-
 # ------------------------------------------
 # 5) Run the App
 # ------------------------------------------
-# if __name__ == '__main__':
-#     app.run(debug=True)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
