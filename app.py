@@ -1,59 +1,41 @@
-import os
 from flask import Flask, render_template, request
 import qrcode
 from io import BytesIO
 import base64
-import requests
+from transformers import pipeline
 
 app = Flask(__name__)
+
 # ------------------------------------------
-# Hugging Face Inference API for sentiment
+# 1) Local Sentiment Analysis using Transformers
 # ------------------------------------------
-API_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english"
+# Load the sentiment-analysis pipeline locally.
+# This uses the "distilbert-base-uncased-finetuned-sst-2-english" model.
+sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 def analyze_sentiment(text):
     """
-    Calls Hugging Face DistilBERT model to get POSITIVE or NEGATIVE sentiment.
+    Runs local sentiment analysis on the given text.
+    Returns a string like "POSITIVE (score: 0.9876)".
     """
-    payload = {"inputs": text}
-    response = requests.post(API_URL, json=payload)
-    print("DEBUG response text:", response.text)  # For troubleshooting
-    try:
-        response.raise_for_status()
-        result = response.json()
-        print("DEBUG result:", result)
-
-        # Check if result is a nested list: [[{label,score}, {label,score}]]
-        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
-            predictions = result[0] 
-            best = max(predictions, key=lambda x: x["score"])
-            label = best["label"]
-            score = best["score"]
-            return f"{label} (score: {score:.4f})"
-
-        # Otherwise, if it's a simple list of dicts: [{label,score}]
-        if isinstance(result, list) and len(result) > 0 and isinstance(result[0], dict):
-            label = result[0]["label"]
-            score = result[0]["score"]
-            return f"{label} (score: {score:.4f})"
-
-        return "Unexpected response format"
-
-    except Exception as e:
-        print("Error calling Hugging Face API:", e)
-        return "Error analyzing sentiment"
+    result = sentiment_pipeline(text)[0]  # e.g. {'label': 'POSITIVE', 'score': 0.9998}
+    return f"{result['label']} (score: {result['score']:.4f})"
 
 def get_label_only(text):
+    """
+    Returns just "POSITIVE" or "NEGATIVE" from the analyze_sentiment result.
+    """
     full_result = analyze_sentiment(text)
-    if full_result.startswith("POSITIVE"):
+    full_result_lower = full_result.lower()
+    if "positive" in full_result_lower:
         return "POSITIVE"
-    elif full_result.startswith("NEGATIVE"):
+    elif "negative" in full_result_lower:
         return "NEGATIVE"
     else:
-        return "NEGATIVE"  # default fallback if there's an error or "Unexpected"
+        return "NEGATIVE"
 
 # ------------------------------------------
-# Local QR Code Generation
+# 2) Local QR Code Generation
 # ------------------------------------------
 def generate_qr_code_local(text):
     """
@@ -65,68 +47,68 @@ def generate_qr_code_local(text):
     img.save(buffer, format="PNG")
     base64_img = base64.b64encode(buffer.getvalue()).decode()
     return "data:image/png;base64," + base64_img
+
 # ------------------------------------------
-# In-memory storage for sentiment counts
+# 3) In-memory Storage for Feedback Texts
 # ------------------------------------------
 feedback_storage = {
-    "cleanliness": {"POSITIVE": 0, "NEGATIVE": 0},
-    "time": {"POSITIVE": 0, "NEGATIVE": 0},
-    "courtesy": {"POSITIVE": 0, "NEGATIVE": 0},
-    "food_quality": {"POSITIVE": 0, "NEGATIVE": 0}
+    "cleanliness": {"POSITIVE": [], "NEGATIVE": []},
+    "time": {"POSITIVE": [], "NEGATIVE": []},
+    "courtesy": {"POSITIVE": [], "NEGATIVE": []},
+    "food_quality": {"POSITIVE": [], "NEGATIVE": []}
 }
+
 # ------------------------------------------
-# Routes
+# 4) Routes
 # ------------------------------------------
 @app.route('/')
 def index():
     """
-    Home page: generates a QR code linking to /survey
+    Home page: generates a QR code linking to /survey.
+    Adjust the survey URL to your local IP so your phone can access it.
     """
-    survey_url = "http://10.10.7.40:5000/survey"
+    # Replace with your computer's actual local IP address.
+    survey_url = "http://10.10.1.36:5000/survey"
     qr_image_data = generate_qr_code_local(survey_url)
     return render_template('index.html', qr_image=qr_image_data, survey_url=survey_url)
-
 
 @app.route('/survey', methods=['GET', 'POST'])
 def survey():
     """
-    Shows a form with 4 text areas: cleanliness, time, courtesy, food_quality.
-    When submitted, we do sentiment analysis on each category and store the tallies.
+    Displays a form with 4 text areas for feedback.
+    The sentiment of each category is determined locally and feedback stored.
     """
     if request.method == 'POST':
-        # Grab the text from each field
         cleanliness_text = request.form.get('cleanliness', '')
         time_text = request.form.get('time', '')
         courtesy_text = request.form.get('courtesy', '')
         food_text = request.form.get('food_quality', '')
 
-        # For each category, if not empty, get the label (POSITIVE or NEGATIVE) and update feedback_storage
         cleanliness_label = "No feedback"
         time_label = "No feedback"
         courtesy_label = "No feedback"
         food_label = "No feedback"
 
         if cleanliness_text.strip():
-            label = get_label_only(cleanliness_text)
-            cleanliness_label = label
-            feedback_storage["cleanliness"][label] += 1
+            lbl = get_label_only(cleanliness_text)
+            cleanliness_label = lbl
+            feedback_storage["cleanliness"][lbl].append(cleanliness_text)
 
         if time_text.strip():
-            label = get_label_only(time_text)
-            time_label = label
-            feedback_storage["time"][label] += 1
+            lbl = get_label_only(time_text)
+            time_label = lbl
+            feedback_storage["time"][lbl].append(time_text)
 
         if courtesy_text.strip():
-            label = get_label_only(courtesy_text)
-            courtesy_label = label
-            feedback_storage["courtesy"][label] += 1
+            lbl = get_label_only(courtesy_text)
+            courtesy_label = lbl
+            feedback_storage["courtesy"][lbl].append(courtesy_text)
 
         if food_text.strip():
-            label = get_label_only(food_text)
-            food_label = label
-            feedback_storage["food_quality"][label] += 1
+            lbl = get_label_only(food_text)
+            food_label = lbl
+            feedback_storage["food_quality"][lbl].append(food_text)
 
-        # Pass them to the result page
         return render_template(
             'result.html',
             cleanliness=cleanliness_text,
@@ -138,20 +120,15 @@ def survey():
             food_quality=food_text,
             food_label=food_label
         )
-
-    # If GET, just show the form
     return render_template('survey.html')
-
 
 @app.route('/overall')
 def overall():
     """
-    Shows how many POSITIVE vs. NEGATIVE submissions we have for each category
+    Overall results page: displays, for each category, a table with two columns
+    (Positive and Negative) listing the feedback texts.
     """
     return render_template('overall.html', data=feedback_storage)
 
-# ------------------------------------------
-# 5) Run the App
-# ------------------------------------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
